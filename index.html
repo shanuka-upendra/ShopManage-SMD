@@ -32,6 +32,42 @@
             </button>
         </div>
     </nav>
+
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 fw-bold">Inventory Overview</h1>
+                <p class="text-muted small mb-0">Live management with LocalStorage persistence.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-danger btn-sm" onclick="clearAllData()">Reset Storage</button>
+                <span class="badge bg-primary px-3 py-2 rounded-pill" id="productCount">Items: 0</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loading-spinner" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted small fw-medium">Syncing...</p>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Product Details</th>
+                            <th>Category</th>
+                            <th style="cursor: pointer" onclick="toggleSort()">Price <i id="sortIcon" class="bi bi-arrow-down-up ms-1"></i></th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

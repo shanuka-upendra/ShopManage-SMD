@@ -49,12 +49,6 @@ function renderTable(products) {
     `).join('');
 }
 
-// 9. HELPERS
-function saveAndRender(data) {
-    localStorage.setItem('shopManage_data', JSON.stringify(data));
-    renderTable(data);
-}
-
 function clearAllData() { 
     localStorage.removeItem('shopManage_data'); 
     location.reload(); 
@@ -109,17 +103,43 @@ productForm.addEventListener('submit', async (e) => {
     } catch (e) { alert("Operation failed"); }
 });
 
+// 5. SEARCH & FILTER
+function handleSearch(query) {
+    clearTimeout(searchTimer);
+    if (!query.trim()) { init(); return; }
+    searchTimer = setTimeout(() => {
+        fetch(`${API_URL}/search?q=${query}`).then(res => res.json()).then(data => renderTable(data.products));
+    }, 500);
+}
+
+function changeCategory(cat) {
+    if (cat === 'all') { init(); return; }
+    fetch(`${API_URL}/category/${cat}`).then(res => res.json()).then(data => renderTable(data.products));
+}
+
 // 6. DELETE
 async function deleteProduct(id) {
     if (!confirm("Delete this product?")) return;
+    
     try {
+        // Attempt to tell the API to delete
         const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        if (res.status === 200) {
-            currentProducts = currentProducts.filter(p => p.id != id);
-            saveAndRender(currentProducts);
-            alert("Deleted Successfully");
-        }
-    } catch (e) { console.error(e); }
+        
+        // Logic: We update the local UI regardless of whether the API 
+        // found the item (200) or didn't find it (404).
+        currentProducts = currentProducts.filter(p => p.id != id);
+        
+        // Critical: Always save and re-render so the item disappears from the screen
+        saveAndRender(currentProducts);
+        
+        alert("Deleted Successfully");
+        
+    } catch (e) { 
+        // If the internet is down, we still remove it locally
+        console.warn("API delete failed, but removing from local storage...");
+        currentProducts = currentProducts.filter(p => p.id != id);
+        saveAndRender(currentProducts);
+    }
 }
 
 // 7. EDIT PRE-FILL
@@ -136,20 +156,6 @@ function editProduct(id) {
     new bootstrap.Modal(document.getElementById('productModal')).show();
 }
 
-// 5. SEARCH & FILTER
-function handleSearch(query) {
-    clearTimeout(searchTimer);
-    if (!query.trim()) { init(); return; }
-    searchTimer = setTimeout(() => {
-        fetch(`${API_URL}/search?q=${query}`).then(res => res.json()).then(data => renderTable(data.products));
-    }, 500);
-}
-
-function changeCategory(cat) {
-    if (cat === 'all') { init(); return; }
-    fetch(`${API_URL}/category/${cat}`).then(res => res.json()).then(data => renderTable(data.products));
-}
-
 // 8. PRICE SORTING
 function toggleSort() {
     currentProducts.sort((a, b) => isAscending ? a.price - b.price : b.price - a.price);
@@ -163,6 +169,12 @@ function resetForm() {
     document.getElementById('productId').value = "";
     document.getElementById('modalTitle').innerText = "Add New Product";
     updatePreview("");
+}
+
+// 9. HELPERS
+function saveAndRender(data) {
+    localStorage.setItem('shopManage_data', JSON.stringify(data));
+    renderTable(data);
 }
 
 // Run the application

@@ -59,3 +59,52 @@ function clearAllData() {
     localStorage.removeItem('shopManage_data'); 
     location.reload(); 
 }
+
+// 3. IMAGE PREVIEW
+function updatePreview(url) {
+    const img = document.getElementById('imagePreview');
+    const text = document.getElementById('previewText');
+    if (url && url.trim() !== "") {
+        img.src = url;
+        img.style.display = "block";
+        text.style.display = "none";
+    } else {
+        img.style.display = "none";
+        text.style.display = "block";
+    }
+}
+
+// 4. CREATE & UPDATE
+productForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('productId').value;
+    const isEdit = id !== "";
+
+    const payload = {
+        title: document.getElementById('productTitle').value,
+        price: parseFloat(document.getElementById('productPrice').value),
+        category: document.getElementById('productCategory').value,
+        thumbnail: document.getElementById('productImage').value
+    };
+
+    try {
+        const url = isEdit ? `${API_URL}/${id}` : `${API_URL}/add`;
+        const res = await fetch(url, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (isEdit) {
+            currentProducts = currentProducts.map(p => p.id == id ? { ...p, ...payload } : p);
+        } else {
+            result.id = Date.now(); 
+            currentProducts.unshift({...result, ...payload});
+        }
+
+        saveAndRender(currentProducts);
+        bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+        alert(`Product ${isEdit ? 'Updated' : 'Added'} Successfully!`);
+    } catch (e) { alert("Operation failed"); }
+});

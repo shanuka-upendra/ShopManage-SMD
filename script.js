@@ -108,3 +108,30 @@ productForm.addEventListener('submit', async (e) => {
         alert(`Product ${isEdit ? 'Updated' : 'Added'} Successfully!`);
     } catch (e) { alert("Operation failed"); }
 });
+
+// 6. DELETE
+async function deleteProduct(id) {
+    if (!confirm("Delete this product?")) return;
+    try {
+        const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        if (res.status === 200) {
+            currentProducts = currentProducts.filter(p => p.id != id);
+            saveAndRender(currentProducts);
+            alert("Deleted Successfully");
+        }
+    } catch (e) { console.error(e); }
+}
+
+// 7. EDIT PRE-FILL
+function editProduct(id) {
+    const p = currentProducts.find(item => item.id == id);
+    if (!p) return;
+    document.getElementById('productId').value = p.id;
+    document.getElementById('productTitle').value = p.title;
+    document.getElementById('productPrice').value = p.price;
+    document.getElementById('productCategory').value = p.category;
+    document.getElementById('productImage').value = p.thumbnail || "";
+    updatePreview(p.thumbnail || "");
+    document.getElementById('modalTitle').innerText = "Edit Product Details";
+    new bootstrap.Modal(document.getElementById('productModal')).show();
+}

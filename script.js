@@ -31,3 +31,31 @@ async function fetchInitialData() {
         loadingSpinner.style.display = 'none'; 
     }
 }
+
+// 2. UI RENDERER
+function renderTable(products) {
+    document.getElementById('productCount').innerText = `Items: ${products.length}`;
+    productTableBody.innerHTML = products.map(p => `
+        <tr id="product-${p.id}">
+            <td><img src="${p.thumbnail || 'https://via.placeholder.com/50'}" class="product-img-td"></td>
+            <td class="fw-bold">${p.title}</td>
+            <td><span class="badge bg-light text-dark border">${p.category}</span></td>
+            <td class="text-success fw-bold">$${p.price}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-secondary border-0" onclick="editProduct(${p.id})"><i class="bi bi-pencil-square"></i></button>
+                <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteProduct(${p.id})"><i class="bi bi-trash3"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// 9. HELPERS
+function saveAndRender(data) {
+    localStorage.setItem('shopManage_data', JSON.stringify(data));
+    renderTable(data);
+}
+
+function clearAllData() { 
+    localStorage.removeItem('shopManage_data'); 
+    location.reload(); 
+}

@@ -135,3 +135,35 @@ function editProduct(id) {
     document.getElementById('modalTitle').innerText = "Edit Product Details";
     new bootstrap.Modal(document.getElementById('productModal')).show();
 }
+
+// 5. SEARCH & FILTER
+function handleSearch(query) {
+    clearTimeout(searchTimer);
+    if (!query.trim()) { init(); return; }
+    searchTimer = setTimeout(() => {
+        fetch(`${API_URL}/search?q=${query}`).then(res => res.json()).then(data => renderTable(data.products));
+    }, 500);
+}
+
+function changeCategory(cat) {
+    if (cat === 'all') { init(); return; }
+    fetch(`${API_URL}/category/${cat}`).then(res => res.json()).then(data => renderTable(data.products));
+}
+
+// 8. PRICE SORTING
+function toggleSort() {
+    currentProducts.sort((a, b) => isAscending ? a.price - b.price : b.price - a.price);
+    isAscending = !isAscending;
+    document.getElementById('sortIcon').className = isAscending ? "bi bi-sort-numeric-down" : "bi bi-sort-numeric-up-alt";
+    renderTable(currentProducts);
+}
+
+function resetForm() {
+    productForm.reset();
+    document.getElementById('productId').value = "";
+    document.getElementById('modalTitle').innerText = "Add New Product";
+    updatePreview("");
+}
+
+// Run the application
+init();
